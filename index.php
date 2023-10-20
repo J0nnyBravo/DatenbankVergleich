@@ -18,44 +18,63 @@
 
 
     //MYSQLI
-    $time_start = microtime(true);
 
     $connMySqli = new mysqli($servername, $username, $password, $dbname);
 
-    $sql = "SELECT * FROM TestTable";
+    $timeAverage = 0;
 
-    $result = mysqli_query($connMySqli, $sql);
+    for ($i = 0; $i < 500; $i++) {
+        $time_start = microtime(true);
 
-    while ($row = mysqli_fetch_assoc($result)){
-        //echo $row["rndInt"]."<br>";
+        $sql = "SELECT * FROM TestTable";
+
+        $result = mysqli_query($connMySqli, $sql);
+
+        while ($row = mysqli_fetch_assoc($result)){
+            //echo $row["rndInt"]."<br>";
+        }
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
+        //echo "MYSQLI: $time seconds<br>";
+        $timeAverage = $timeAverage +$time;
+        //echo $timeAverage;
     }
-    $time_end = microtime(true);
-    $time = $time_end - $time_start;
+    $timeAverage = $timeAverage / 500;
+    echo "Druchschnitt-SQLI: $timeAverage <br>";
 
-    echo "MYSQLI: $time seconds<br>";
+
 
     $connMySqli->close();
 
-    $time_start = null;
-
+    $time_start = 0;
+    $time_end = 0;
+    $timeAverage = 0;
 
 
     //PDO
     $time_start = microtime(true);
 
     $connPdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-    $stmt = $connPdo->prepare("SELECT * FROM TestTable");
-    $stmt->execute();
 
-    $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    while ($row = $stmt->fetch()) {
-        //echo $row["rndInt"]."<br>";
+    for ($i = 0; $i < 500; $i++) {
+
+        $stmt = $connPdo->prepare("SELECT * FROM TestTable");
+        $stmt->execute();
+
+        $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        while ($row = $stmt->fetch()) {
+            //echo $row["rndInt"]."<br>";
         }
 
-    $time_end = microtime(true);
-    $time = $time_end - $time_start;
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
 
-    echo "PDO: $time seconds <br>";
+        //echo "PDO: $time seconds <br>";
+        $timeAverage = $timeAverage +$time;
+
+    }
+    $timeAverage = $timeAverage / 500;
+    echo "Druchschnitt-PDO: $timeAverage <br>";
 
     $connPdo = null;
 
